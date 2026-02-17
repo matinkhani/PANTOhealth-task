@@ -1,73 +1,189 @@
-# React + TypeScript + Vite
+# German Train Stations Map
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern React application that displays train stations across Germany on an interactive map with filtering capabilities by city. Click on any station in the list to smoothly pan the map to its location.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Interactive Map**: Displays all train stations with markers using Leaflet
+- **City Filtering**: Filter stations by city using a dropdown selector
+- **Smooth Map Navigation**: Click any station in the list to center the map on it
+- **Loading & Error States**: Comprehensive loading spinners and error handling
+- **Responsive Design**: Perfectly works on desktop and mobile devices
+- **Performance Optimized**: Uses `useMemo` for efficient filtering and marker calculations
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Technology                  | Purpose                    |
+| --------------------------- | -------------------------- |
+| **React**                   | Component-based UI library |
+| **Tailwind CSS**            | Utility-first styling      |
+| **Leaflet + React-Leaflet** | Interactive maps           |
+| **Axios**                   | API data fetching          |
+| **TypeScript**              | Type safety                |
 
-## Expanding the ESLint configuration
+## 🚀 Quick Start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Clone the repository
+git clone https://github.com/matinkhani/PANTOhealth-task.git
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Install dependencies
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Start development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📁 Project Structure
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+src/<br />
+├── hooks/<br />
+│ └── api/<br />
+│ └── use-get.ts # Custom API hook<br />
+├── components/<br />
+│ └── map.tsx # Reusable Leaflet map component<br />
+├── views/<br />
+│ └── HomeView.tsx # Main application view<br />
+└── constants/<br />
+└── api.ts # API endpoints
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🎯 Key Components
+
+### 1. Custom API Hook (`useGet`)
+
+A reusable hook for data fetching with loading and error states:
+
+```typescript
+export const useGet = <T>({ url, options }: Props) => {
+  const [data, setData] = useState<T | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  // Handles axios requests with proper error handling
+};
 ```
+
+**Features:**
+
+- Generic TypeScript support
+- Automatic loading states
+- Comprehensive error handling
+- Clean separation of concerns
+
+### 2. Reusable Map Component
+
+Fully customizable Leaflet map with smooth view transitions:
+
+```typescript
+export default function Map({
+  locations,
+  center = [51.1657, 10.4515], // Germany center
+  zoom = 8,
+}: MapProps) {
+  // useMemo for optimized marker calculations
+  const markers = useMemo(() => {
+    return locations.map((location) => ({
+      ...location,
+      position: [location.lat, location.lng] as LatLngExpression,
+    }));
+  }, [locations]);
+}
+```
+
+**Features:**
+
+- Smooth map panning with `ChangeView` component
+- Customizable markers with popups
+- Optimized re-renders with `useMemo`
+- Responsive styling
+
+### 3. Main Home View
+
+Orchestrates the entire application:
+
+```typescript
+export const HomeView = () => {
+  const [center, setCenter] = useState<[number, number]>([51.1657, 10.4515]);
+  const [selectedCity, setSelectedCity] = useState<string>("all");
+
+  const { data, error, isLoading } = useGet<TrainStationT[]>({
+    url: ENDPOINTS.trainStations,
+  });
+  // Memoized filtering and city options
+};
+```
+
+## 🎨 UI Components
+
+### City Filter Dropdown
+
+```typescript
+export const CityFilter = ({ cities, onChange }: Props) => {
+  const items = [
+    { label: "All Cities", value: "all" },
+    ...cities.map((city) => ({ label: city, value: city })),
+  ];
+};
+```
+
+### Interactive Stations List
+
+Beautiful, accessible station cards with hover effects:
+
+```typescript
+export const CitiesList = ({ data, onSelect }: Props) => {
+  return (
+    <div className="flex flex-col gap-2">
+      {data.map((city) => (
+        <div
+          key={city.id}
+          role="button"
+          tabIndex={0}
+          onClick={() => onSelect?.(city)}
+          className="
+            group flex items-start gap-3
+            p-3 bg-white rounded-xl
+            hover:bg-blue-50 hover:shadow-md
+            transition-all duration-200
+          "
+        >
+          <div className="w-9 h-9 rounded-lg bg-blue-100">🚉</div>
+          <div>
+            <h3 className="font-bold text-sm">{city.name}</h3>
+            <p className="text-xs text-gray-500">{city.city}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+```
+
+## ⚡ Performance Optimizations
+
+- ✅ `useMemo` for expensive calculations (filtering, markers)
+- ✅ Custom hook prevents unnecessary re-fetches
+- ✅ Efficient DOM updates with proper keys
+- ✅ Lazy loading states prevent layout shift
+- ✅ Tailwind CSS for minimal bundle size
+
+## 🔮 Data Flow
+
+API Request → useGet Hook → HomeView
+↓
+City Filter → Filtered Data
+↓
+Map Component ← Stations List ← Click Handler
+
+## 📱 Responsive Design
+
+- **Desktop**: Sidebar + Full map
+- **Mobile**: Stacked layout with touch-friendly interactions
+- **Accessibility**: Keyboard navigation, ARIA labels, focus management
+
+## 🐛 Troubleshooting
+
+| Issue              | Solution                 |
+| ------------------ | ------------------------ |
+| Map not loading    | Check Leaflet CSS import |
+| Data not fetching  | Verify API endpoint      |
+| Filter not working | Clear browser cache      |
