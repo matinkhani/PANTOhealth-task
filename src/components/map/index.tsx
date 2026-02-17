@@ -37,7 +37,7 @@ function ChangeView({
 export default function Map({
   locations,
   center = [51.1657, 10.4515],
-  zoom = 7,
+  zoom = 8,
   className = "",
 }: MapProps) {
   const markers = useMemo(() => {
